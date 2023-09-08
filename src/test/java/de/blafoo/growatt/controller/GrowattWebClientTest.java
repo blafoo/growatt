@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,15 +26,20 @@ class GrowattWebClientTest {
 	@Value("${growatt.password}")
 	private String password;
 	
+	@Value("${proxy.url}")
+	private String proxyUrl;
+	
+	@Value("${proxy.port}")
+	private String proxyPort;
+	
+	@Disabled // enable after setting account/password in application.properties
 	@Test
 	void testGrowattWebClient() {
 		
-		assertNotNull(account);
-		assertNotNull(password);
-		assertFalse(account.isEmpty()); // define an user name in the application.properties
-		assertFalse(password.isEmpty()); // define a password in the application.properties
+		assertFalse(StringUtils.isBlank(account)); // define an user name in the application.properties
+		assertFalse(StringUtils.isBlank(password)); // define a password in the application.properties
 		
-		GrowattWebClient client = new GrowattWebClient("client-proxy.hdix2.zz", 3128);
+		GrowattWebClient client = StringUtils.isBlank(proxyUrl) ? new GrowattWebClient() : new GrowattWebClient(proxyUrl, Integer.valueOf(proxyPort));
 		
 		String login = client.login(new LoginRequest(account, password));
 		
