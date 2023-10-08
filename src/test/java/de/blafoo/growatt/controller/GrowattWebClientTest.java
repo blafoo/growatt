@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.StringUtils;
@@ -15,6 +14,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import de.blafoo.growatt.entity.DayResponse;
 import de.blafoo.growatt.entity.EnergyRequest;
 import de.blafoo.growatt.entity.LoginRequest;
+import de.blafoo.growatt.entity.MonthResponse;
+import de.blafoo.growatt.entity.YearResponse;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application.properties") 
@@ -32,7 +33,7 @@ class GrowattWebClientTest {
 	@Value("${proxy.port}")
 	private String proxyPort;
 	
-	@Disabled // enable after setting account/password in application.properties
+//	@Disabled // enable after setting account/password in application.properties
 	@Test
 	void testGrowattWebClient() {
 		
@@ -47,10 +48,20 @@ class GrowattWebClientTest {
 		assertNotNull(client.getUserId());
 		assertNotNull(client.getPlantId());
 		
-		DayResponse result = client.getInvEnergyDayChart(new EnergyRequest(client.getPlantId(), "2023-05-31"));
+		DayResponse day = client.getInvEnergyDayChart(new EnergyRequest(client.getPlantId(), "2023-05-31"));
 		
-		assertEquals(1, result.getResult());
-		assertEquals(24*12, result.getObj().getPac().size());
+		assertEquals(1, day.getResult());
+		assertEquals(24*12, day.getObj().getPac().size());
+		
+		MonthResponse month = client.getInvEnergyMonthChart(new EnergyRequest(client.getPlantId(), "2023-05"));
+		
+		assertEquals(1, month.getResult());
+		assertEquals(31, month.getObj().getEnergy().size());
+		
+		YearResponse year = client.getInvEnergyYearChart(new EnergyRequest(client.getPlantId(), "2023"));
+		
+		assertEquals(1, year.getResult());
+		assertEquals(12, year.getObj().getEnergy().size());
 	}
 
 }
