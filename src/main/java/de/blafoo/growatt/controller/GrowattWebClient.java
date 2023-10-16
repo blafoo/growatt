@@ -4,6 +4,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -17,14 +18,17 @@ import de.blafoo.growatt.entity.DayResponse;
 import de.blafoo.growatt.entity.EnergyRequest;
 import de.blafoo.growatt.entity.LoginRequest;
 import de.blafoo.growatt.entity.MonthResponse;
+import de.blafoo.growatt.entity.TotalDataInvResponse;
 import de.blafoo.growatt.entity.TotalDataResponse;
 import de.blafoo.growatt.entity.YearResponse;
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
 
 @Slf4j
+@Component
 public class GrowattWebClient {
 	
 	public static final String ONE_PLANT_ID = "onePlantId";
@@ -123,6 +127,13 @@ public class GrowattWebClient {
 		
 		return login;
 	}
+	
+	/**
+	 * Retrieve generic informations and about the power production.
+	 */
+	public TotalDataResponse getTotalData(EnergyRequest energyRequest) {
+		return (TotalDataResponse) request("/indexbC/getTotalData", energyRequest.getPlantId(), energyRequest.getDate(), TotalDataResponse.class);
+	}
 
 	/**
 	 * Retrieve the power production for a specific day. The date as part of the EnergyRequest must have the format yyyy-mm-dd, e.g. 2023-05-31.
@@ -148,14 +159,19 @@ public class GrowattWebClient {
 		return (YearResponse) request("/indexbC/inv/getInvEnergyYearChart", energyRequest.getPlantId(), energyRequest.getDate(), YearResponse.class);
 	}
 	
-	public TotalDataResponse getInvTotalData(EnergyRequest energyRequest) {
-		return (TotalDataResponse) request("/indexbC/inv/getInvTotalData", energyRequest.getPlantId(), energyRequest.getDate(), TotalDataResponse.class);
+	/**
+	 * Retrieve some data about the power production for a specificc plant.
+	 */
+	public TotalDataInvResponse getInvTotalData(EnergyRequest energyRequest) {
+		return (TotalDataInvResponse) request("/indexbC/inv/getInvTotalData", energyRequest.getPlantId(), energyRequest.getDate(), TotalDataInvResponse.class);
 	}
 
 	private Object request(String uri, String plantId, String date, Class<?> clazz) {
 		LinkedMultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-		data.add("plantId", plantId);
-		data.add("date", date);
+		if ( StringUtils.isNotEmpty(plantId))
+			data.add("plantId", plantId);
+		if ( StringUtils.isNotEmpty(date))
+			data.add("date", date);
 		
 		String infos = client
 			.post()

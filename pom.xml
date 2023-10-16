@@ -12,9 +12,9 @@
 	
 	<groupId>de.blafoo</groupId>
 	<artifactId>growatt</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>growatt</name>
-	<description>REST API for server.growatt.com</description>
+	<description>API to query data from server.growatt.com</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -40,7 +40,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub blafoo Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/blafoo/vaadin</url>
+			<url>https://maven.pkg.github.com/blafoo/growatt</url>
 		</repository>
 	</distributionManagement>
 	

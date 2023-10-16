@@ -34,7 +34,7 @@ class GrowattWebClientTest {
 	@Value("${proxy.port}")
 	private String proxyPort;
 	
-	@Disabled // enable after setting account/password in application.properties
+	@Disabled // enable after setting account/password in src/test/resources/application.properties
 	@Test
 	void testGrowattWebClient() {
 		

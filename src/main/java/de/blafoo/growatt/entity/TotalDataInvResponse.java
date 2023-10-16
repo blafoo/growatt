@@ -1,7 +1,5 @@
 package de.blafoo.growatt.entity;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class YearResponse {
-	
+public class TotalDataInvResponse {
+
 	private Long result;
 	private Obj obj;
 
@@ -19,8 +17,8 @@ public class YearResponse {
 	@AllArgsConstructor
 	public class Obj {
 		
-		private List<Double> energy;
-
+		private String epvToday;
+		private String epvTotal;
+		private String pac;
 	}
-	
 }
