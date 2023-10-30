@@ -184,8 +184,11 @@ public class GrowattWebClient {
             .block();
 		
 		try {
-			ObjectMapper om = new ObjectMapper();
-			return om.readValue(infos, clazz);
+			if ( StringUtils.isNotBlank(infos)) {
+				ObjectMapper om = new ObjectMapper();
+				return om.readValue(infos, clazz);
+			} else 
+				log.error("POST to {} returned 'null'", uri);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
