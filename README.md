@@ -18,3 +18,7 @@ DayResponse day = client.getInvEnergyDayChart(new EnergyRequest(client.getPlantI
 
 1. Unit test `GrowattWebClientTest`
 1. [Vaadin 24 project using the `GrowattWebClient`](https://github.com/blafoo/BKW)
+
+## Change log
+
+07.12.2023 The password used to login is hashed now
