@@ -1,3 +1,5 @@
+[![Java CI with Maven](https://github.com/blafoo/growatt/actions/workflows/maven.yml/badge.svg)](https://github.com/blafoo/growatt/actions/workflows/maven.yml)
+
 # growatt
 
 API to query data from server.growatt.com for Growatt inverters.
