@@ -14,6 +14,11 @@ public class EnergyRequest {
 	/** e.g. 2023, 2023-06, 2023-06-19 depending on the query */
 	private String date;
 	
+	public EnergyRequest(@NonNull String plantId) {
+		this.plantId = plantId;
+		this.date = null;
+	}
+	
 	public EnergyRequest(@NonNull String plantId, @Nullable String date) {
 		this.plantId = plantId;
 		this.date = date;

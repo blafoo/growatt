@@ -21,7 +21,6 @@ import de.blafoo.growatt.entity.MonthResponse;
 import de.blafoo.growatt.entity.TotalDataInvResponse;
 import de.blafoo.growatt.entity.TotalDataResponse;
 import de.blafoo.growatt.entity.YearResponse;
-import de.blafoo.growatt.md5.MD5;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -109,7 +108,7 @@ public class GrowattWebClient {
 	public String login(LoginRequest loginRequest) {
 		LinkedMultiValueMap<String, String> loginData = new LinkedMultiValueMap<>();
 		loginData.add("account", loginRequest.getAccount());
-		loginData.add("passwordCrc", MD5.md5(loginRequest.getPassword()));
+		loginData.add("passwordCrc", loginRequest.getPasswordCrc());
 		
 		String login = client
 			.post()

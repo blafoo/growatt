@@ -1,14 +1,18 @@
 package de.blafoo.growatt.entity;
 
-import lombok.AllArgsConstructor;
+import de.blafoo.growatt.md5.MD5;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class LoginRequest {
 	
 	private String account;
 
-	private String password;
+	private String passwordCrc;
+	
+	public LoginRequest(String account, String password) {
+		this.account = account;
+		this.passwordCrc = MD5.md5(password);
+	}
 
 }
