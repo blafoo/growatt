@@ -16,6 +16,8 @@ import de.blafoo.growatt.entity.DayResponse;
 import de.blafoo.growatt.entity.EnergyRequest;
 import de.blafoo.growatt.entity.LoginRequest;
 import de.blafoo.growatt.entity.MonthResponse;
+import de.blafoo.growatt.entity.TotalDataInvResponse;
+import de.blafoo.growatt.entity.TotalDataResponse;
 import de.blafoo.growatt.entity.YearResponse;
 
 @ExtendWith(SpringExtension.class)
@@ -44,23 +46,27 @@ class GrowattWebClientTest {
 		GrowattWebClient client = StringUtils.isBlank(proxyUrl) ? new GrowattWebClient() : new GrowattWebClient(proxyUrl, Integer.valueOf(proxyPort));
 		
 		String login = client.login(new LoginRequest(account, password));
-		
 		assertEquals("{\"result\":1}", login);
 		assertNotNull(client.getUserId());
 		assertNotNull(client.getPlantId());
 		
-		DayResponse day = client.getInvEnergyDayChart(new EnergyRequest(client.getPlantId(), "2023-05-31"));
+		TotalDataResponse totalData = client.getTotalData(new EnergyRequest(client.getPlantId()));
+		assertEquals(1, totalData.getResult());
+		assertEquals(account, totalData.getObj().getAccountName());
+		assertEquals(client.getPlantId(), totalData.getObj().getPlantId());
 		
+		TotalDataInvResponse totalDataInv = client.getInvTotalData(new EnergyRequest(client.getPlantId()));
+		assertEquals(1, totalDataInv.getResult());
+		
+		DayResponse day = client.getInvEnergyDayChart(new EnergyRequest(client.getPlantId(), "2023-05-31"));
 		assertEquals(1, day.getResult());
 		assertEquals(24*12, day.getObj().getPac().size());
 		
 		MonthResponse month = client.getInvEnergyMonthChart(new EnergyRequest(client.getPlantId(), "2023-05"));
-		
 		assertEquals(1, month.getResult());
 		assertEquals(31, month.getObj().getEnergy().size());
 		
 		YearResponse year = client.getInvEnergyYearChart(new EnergyRequest(client.getPlantId(), "2023"));
-		
 		assertEquals(1, year.getResult());
 		assertEquals(12, year.getObj().getEnergy().size());
 	}
