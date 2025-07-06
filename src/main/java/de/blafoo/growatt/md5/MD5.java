@@ -20,7 +20,7 @@ public final class MD5 {
 		try {
 			ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 			
-			engine.eval(new URLReader(new URL("https://server.growatt.com/javaScript/xhb/js/MD5.js?1.0.0")));
+			engine.eval(new URLReader(new URL("https://server.growatt.com/javaScript/xhb/js/MD5.js?1.6.1")));
 
 			Invocable inv = (Invocable) engine;
 			return (String) inv.invokeFunction("MD5", password);
