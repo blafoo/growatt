@@ -43,7 +43,9 @@ public class GrowattWebClient {
 	 * Constructor without a proxy
 	 */
 	public GrowattWebClient() {
-		this(HttpClient.create());
+		this(HttpClient
+			.create()
+			.followRedirect(true));
 	}
 	
 	/**
@@ -53,7 +55,9 @@ public class GrowattWebClient {
 	 * @param proxyPort
 	 */
 	public GrowattWebClient(String proxyURL, int proxyPort) {
-		this(HttpClient.create()
+		this(HttpClient
+			.create()
+			.followRedirect(true)
 			.proxy(proxy-> proxy.type(ProxyProvider.Proxy.HTTP).host(proxyURL).port(proxyPort)));
 	}
 	
@@ -64,14 +68,6 @@ public class GrowattWebClient {
 			.baseUrl("http://server.growatt.com")
 			.clientConnector(clientHttpConnector)
 			.build();
-	}
-
-	/**
-	 * Get the internal user id.
-	 * @return
-	 */
-	public String getUserId() {
-		return getCookie(SELECTED_USER_ID);
 	}
 
 	/** 
@@ -118,12 +114,14 @@ public class GrowattWebClient {
             .exchangeToMono(response -> readCookies(cookieJar, response))
             .block();
 		
-		client
+		/*
+		var plantListTitle = client
 			.get()
-			.uri("/selectPlant/getBusiness")
+			.uri("/index/getPlantListTitle")
 			.cookies(cookies -> writeCookies(cookieJar, cookies))
 			.exchangeToMono(response -> readCookies(cookieJar, response))
 	        .block();
+		*/
 		
 		return login;
 	}
@@ -168,9 +166,9 @@ public class GrowattWebClient {
 
 	private Object request(String uri, String plantId, String date, Class<?> clazz) {
 		LinkedMultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-		if ( StringUtils.isNotEmpty(plantId))
+		if (StringUtils.isNotEmpty(plantId))
 			data.add("plantId", plantId);
-		if ( StringUtils.isNotEmpty(date))
+		if (StringUtils.isNotEmpty(date))
 			data.add("date", date);
 		
 		String infos = client
@@ -184,7 +182,7 @@ public class GrowattWebClient {
             .block();
 		
 		try {
-			if ( StringUtils.isNotBlank(infos)) {
+			if (StringUtils.isNotBlank(infos)) {
 				ObjectMapper om = new ObjectMapper();
 				return om.readValue(infos, clazz);
 			} else 

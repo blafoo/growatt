@@ -47,7 +47,6 @@ class GrowattWebClientTest {
 		
 		String login = client.login(new LoginRequest(account, password));
 		assertEquals("{\"result\":1}", login);
-		assertNotNull(client.getUserId());
 		assertNotNull(client.getPlantId());
 		
 		TotalDataResponse totalData = client.getTotalData(new EnergyRequest(client.getPlantId()));
