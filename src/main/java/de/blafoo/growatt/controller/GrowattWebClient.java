@@ -1,28 +1,23 @@
 package de.blafoo.growatt.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.blafoo.growatt.entity.*;
+import de.blafoo.growatt.md5.MD5;
+import io.micrometer.common.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.blafoo.growatt.entity.DayResponse;
-import de.blafoo.growatt.entity.EnergyRequest;
-import de.blafoo.growatt.entity.LoginRequest;
-import de.blafoo.growatt.entity.MonthResponse;
-import de.blafoo.growatt.entity.TotalDataInvResponse;
-import de.blafoo.growatt.entity.TotalDataResponse;
-import de.blafoo.growatt.entity.YearResponse;
-import io.micrometer.common.util.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
@@ -33,11 +28,9 @@ public class GrowattWebClient {
 	
 	public static final String ONE_PLANT_ID = "onePlantId";
 
-	public static final String SELECTED_USER_ID = "selectedUserId";
-
-	private MultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
+	private final MultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
 	
-	private WebClient client;
+	private final WebClient client;
 	
 	/**
 	 * Constructor without a proxy
@@ -97,79 +90,69 @@ public class GrowattWebClient {
 
 	/**
 	 * Login into server.growatt.com. Initialize all needed cookies for the following requests.
-	 * 
-	 * @param loginRequest
-	 * @return
 	 */
-	public String login(LoginRequest loginRequest) {
+	public String login(String account, String password) {
 		LinkedMultiValueMap<String, String> loginData = new LinkedMultiValueMap<>();
-		loginData.add("account", loginRequest.getAccount());
-		loginData.add("passwordCrc", loginRequest.getPasswordCrc());
+		loginData.add("account", account);
+		loginData.add("passwordCrc", MD5.md5(password));
 		
-		String login = client
+		return client
 			.post()
 			.uri("/login")
 			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 			.body(BodyInserters.fromFormData(loginData))
             .exchangeToMono(response -> readCookies(cookieJar, response))
             .block();
-		
-		/*
-		var plantListTitle = client
-			.get()
-			.uri("/index/getPlantListTitle")
-			.cookies(cookies -> writeCookies(cookieJar, cookies))
-			.exchangeToMono(response -> readCookies(cookieJar, response))
-	        .block();
-		*/
-		
-		return login;
-	}
+    }
 	
 	/**
-	 * Retrieve generic informations and about the power production.
+	 * Retrieve generic informations about the power production.
 	 */
-	public TotalDataResponse getTotalData(EnergyRequest energyRequest) {
-		return (TotalDataResponse) request("/indexbC/getTotalData", energyRequest.getPlantId(), energyRequest.getDate(), TotalDataResponse.class);
+    @Deprecated
+	public TotalDataResponse getTotalData(String plantId) {
+		return request("/indexbC/getTotalData", plantId, null, null, "", TotalDataResponse.class);
 	}
 
 	/**
 	 * Retrieve the power production for a specific day. The date as part of the EnergyRequest must have the format yyyy-mm-dd, e.g. 2023-05-31.
 	 * The response contains 288 values for each five minute intervall of the day.
 	 */
-	public DayResponse getInvEnergyDayChart(EnergyRequest energyRequest) {
-		return (DayResponse) request("/indexbC/inv/getInvEnergyDayChart", energyRequest.getPlantId(), energyRequest.getDate(), DayResponse.class);
+	public DayResponse getEnergyDayChart(String plantId, String date) {
+		return request("/energy/compare/getDevicesDayChart", plantId, date, null, "pac", DayResponse.class);
 	}
 	
 	/**
 	 * Retrieve the power production for a specific month. The date as part of the EnergyRequest must have the format yyyy-mm, e.g. 2023-05.
 	 * The response contains one value for each day of the month.
 	 */
-	public MonthResponse getInvEnergyMonthChart(EnergyRequest energyRequest) {
-		return (MonthResponse) request("/indexbC/inv/getInvEnergyMonthChart", energyRequest.getPlantId(), energyRequest.getDate(), MonthResponse.class);
+	public MonthResponse getEnergyMonthChart(String plantId, String date) {
+		return request("/energy/compare/getDevicesMonthChart", plantId, date, null, "energy,autoEnergy", MonthResponse.class);
 	}
 	
 	/**
-	 * Retrieve the power production for a specific year. The date as part of the EnergyRequest must have the format yyyy, e.g. 2023.
+	 * Retrieve the power production for a specific year. The year as part of the EnergyRequest must have the format yyyy, e.g. 2023.
 	 * The response contains one value for each month of the month.
 	 */
-	public YearResponse getInvEnergyYearChart(EnergyRequest energyRequest) {
-		return (YearResponse) request("/indexbC/inv/getInvEnergyYearChart", energyRequest.getPlantId(), energyRequest.getDate(), YearResponse.class);
+	public YearResponse getEnergyYearChart(String plantId, String year) {
+		return request("/energy/compare/getDevicesYearChart", plantId, null, year, "autoEnergy", YearResponse.class);
 	}
 	
 	/**
-	 * Retrieve some data about the power production for a specificc plant.
+	 * Retrieve the power production for the last 5 years.
+     * The response contains a value for every year.
 	 */
-	public TotalDataInvResponse getInvTotalData(EnergyRequest energyRequest) {
-		return (TotalDataInvResponse) request("/indexbC/inv/getInvTotalData", energyRequest.getPlantId(), energyRequest.getDate(), TotalDataInvResponse.class);
+	public YearResponse getEnergyTotalChart(String plantId, String lastYear) {
+		return request("/energy/compare/getDevicesTotalChart", plantId, null, lastYear, "energy,autoEnergy", YearResponse.class);
 	}
 
-	private Object request(String uri, String plantId, String date, Class<?> clazz) {
+	private <T> T request(String uri, @NonNull String plantId, @Nullable String date, @Nullable String year, String params, Class<T> clazz) {
 		LinkedMultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-		if (StringUtils.isNotEmpty(plantId))
-			data.add("plantId", plantId);
+		data.add("plantId", plantId);
 		if (StringUtils.isNotEmpty(date))
 			data.add("date", date);
+        if (StringUtils.isNotEmpty(year))
+            data.add("year", year);
+        data.add("jsonData", "[{\"type\":\"plant\",\"sn\":\"%s\",\"params\":\"%s\"}]".formatted(plantId, params));
 		
 		String infos = client
 			.post()
@@ -193,5 +176,4 @@ public class GrowattWebClient {
 		
 		return null;
 	}
-	
 }

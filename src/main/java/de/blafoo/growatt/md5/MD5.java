@@ -1,16 +1,14 @@
 package de.blafoo.growatt.md5;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import lombok.extern.slf4j.Slf4j;
+import org.openjdk.nashorn.api.scripting.URLReader;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-
-import org.openjdk.nashorn.api.scripting.URLReader;
-
-import lombok.extern.slf4j.Slf4j;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Slf4j
 public final class MD5 {
@@ -20,7 +18,7 @@ public final class MD5 {
 		try {
 			ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 			
-			engine.eval(new URLReader(new URL("https://server.growatt.com/javaScript/xhb/js/MD5.js?1.6.1")));
+			engine.eval(new URLReader(new URL("https://server.growatt.com/javaScript/xhb/js/MD5.js?1.7.5")));
 
 			Invocable inv = (Invocable) engine;
 			return (String) inv.invokeFunction("MD5", password);

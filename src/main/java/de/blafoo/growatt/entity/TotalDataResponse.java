@@ -2,7 +2,6 @@ package de.blafoo.growatt.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,14 +14,13 @@ public class TotalDataResponse {
 
 	/** Status of query: 1 == ok */
 	private Long result;
-	
 	private Obj obj;
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	@Getter
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public class Obj {
+	public static class Obj {
 		
 		@JsonProperty("eRadiant") 
 	    private String eRadiant;
@@ -32,7 +30,7 @@ public class TotalDataResponse {
 	    @JsonProperty("mTotal") 
 	    private String mTotal;
 	    
-	    /** Account */
+	    /** Plant manager */
 	    private String accountName;
 	    
 	    private String faultNum;
