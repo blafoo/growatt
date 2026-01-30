@@ -3,8 +3,8 @@ package de.blafoo.growatt.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.blafoo.growatt.entity.DayResponse;
+import de.blafoo.growatt.entity.DevicesResponse;
 import de.blafoo.growatt.entity.MonthResponse;
-import de.blafoo.growatt.entity.TotalDataResponse;
 import de.blafoo.growatt.entity.YearResponse;
 import de.blafoo.growatt.md5.MD5;
 import io.micrometer.common.util.StringUtils;
@@ -117,9 +117,11 @@ public class GrowattWebClient {
 	/**
 	 * Retrieve generic informations about the power production.
 	 */
-    @Deprecated
-	public TotalDataResponse getTotalData(String plantId) {
-		return request("/indexbC/getTotalData", plantId, null, null, "", TotalDataResponse.class);
+	public DevicesResponse getDevicesByPlantList(String plantId) {
+		LinkedMultiValueMap<String, String> payload = new LinkedMultiValueMap<>();
+		payload.add("currPage", "1");
+		payload.add("plantId", plantId);
+		return request("/panel/getDevicesByPlantList", payload, DevicesResponse.class);
 	}
 
 	/**
@@ -155,14 +157,17 @@ public class GrowattWebClient {
 	}
 
 	private <T> T request(String uri, @NonNull String plantId, @Nullable String date, @Nullable Integer year, String params, Class<T> clazz) {
-		LinkedMultiValueMap<String, String> data = createBody(plantId, date, year, params);
+		LinkedMultiValueMap<String, String> payload = createBody(plantId, date, year, params);
+		return request(uri, payload, clazz);
+	}
 
+	private <T> T request(String uri, LinkedMultiValueMap<String, String> payload, Class<T> clazz) {
 		String infos = client
 			.post()
 			.uri(uri)
 			.cookies(cookies -> writeCookies(cookieJar, cookies))
 			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-			.body(BodyInserters.fromFormData(data))
+			.body(BodyInserters.fromFormData(payload))
             .retrieve()
             .bodyToMono(String.class)
             .block();
@@ -187,7 +192,8 @@ public class GrowattWebClient {
 			data.add("date", date);
 		if (year != null)
 			data.add("year", String.valueOf(year));
-		data.add("jsonData", "[{\"type\":\"plant\",\"sn\":\"%s\",\"params\":\"%s\"}]".formatted(plantId, params));
+		if (params != null)
+			data.add("jsonData", "[{\"type\":\"plant\",\"sn\":\"%s\",\"params\":\"%s\"}]".formatted(plantId, params));
 		return data;
 	}
 }
