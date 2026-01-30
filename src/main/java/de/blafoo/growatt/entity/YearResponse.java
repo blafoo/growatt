@@ -32,7 +32,7 @@ public class YearResponse {
     @AllArgsConstructor
     public static class Datas {
 
-        public List<Double> energy;
+        private List<Double> energy;
     }
 	
 }

@@ -1,6 +1,7 @@
 package de.blafoo.growatt.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,41 +21,45 @@ public class DevicesResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Obj{
-        public int currPage;
-        public int pages;
-        public int pageSize;
-        public int count;
-        public int ind;
-        public ArrayList<Data> datas;
-        public boolean notPager;
+        private int currPage;
+        private int pages;
+        private int pageSize;
+        private int count;
+        private int ind;
+        private ArrayList<Data> datas;
+        private boolean notPager;
     }
 
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Data {
-        public String deviceType;
-        public String ptoStatus;
-        public String timeServer;
-        public String accountName;
-        public String timezone;
-        public String plantId;
-        public String deviceTypeName;
-        public String bdcNum;
-        public String nominalPower;
-        public String bdcStatus;
-        public Double eToday;
-        public Double eMonth;
-        public String datalogTypeTest;
-        public Double eTotal;
-        public Double pac;
-        public String datalogSn;
-        public String alias;
-        public String location;
-        public String deviceModel;
-        public String sn;
-        public String plantName;
-        public String status;
-        public String lastUpdateTime;
+        private String deviceType;
+        private String ptoStatus;
+        private String timeServer;
+        private String accountName;
+        private String timezone;
+        private String plantId;
+        private String deviceTypeName;
+        private String bdcNum;
+        private String nominalPower;
+        private String bdcStatus;
+        @JsonProperty("eToday")
+        private Double eToday;
+        @JsonProperty("eMonth")
+        private Double eMonth;
+        private String datalogTypeTest;
+        @JsonProperty("eTotal")
+        private Double eTotal;
+        @JsonProperty("pac")
+        private Double pac;
+        private String datalogSn;
+        private String alias;
+        private String location;
+        private String deviceModel;
+        private String sn;
+        private String plantName;
+        private String status;
+        private String lastUpdateTime;
     }
 }

@@ -125,7 +125,7 @@ public class GrowattWebClient {
 	}
 
 	/**
-	 * Retrieve the power production for a specific day.
+	 * Retrieve the power production for a specific day within the last 3 months. Does not work for days older than 3 months.
 	 * The response contains 288 values for each five minute intervall of the day.
 	 */
 	public DayResponse getEnergyDayChart(String plantId, LocalDate date) {
@@ -141,7 +141,7 @@ public class GrowattWebClient {
 	}
 	
 	/**
-	 * Retrieve the power production for a specific year. The year as part of the EnergyRequest must have the format yyyy, e.g. 2023.
+	 * Retrieve the power production for a specific year.
 	 * The response contains one value for each month of the month.
 	 */
 	public YearResponse getEnergyYearChart(String plantId, int year) {
