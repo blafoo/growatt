@@ -1,5 +1,9 @@
 package de.blafoo.growatt.controller;
 
+import de.blafoo.growatt.entity.DayResponse;
+import de.blafoo.growatt.entity.DevicesResponse;
+import de.blafoo.growatt.entity.MonthResponse;
+import de.blafoo.growatt.entity.YearResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,11 +11,6 @@ import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import de.blafoo.growatt.entity.DayResponse;
-import de.blafoo.growatt.entity.MonthResponse;
-import de.blafoo.growatt.entity.TotalDataResponse;
-import de.blafoo.growatt.entity.YearResponse;
 
 import java.time.LocalDate;
 
@@ -50,10 +49,10 @@ class GrowattWebClientTest {
 		assertEquals("{\"result\":1}", login);
 		assertNotNull(client.getPlantId());
 		
-		TotalDataResponse totalData = client.getTotalData(client.getPlantId());
-		assertEquals(1, totalData.getResult());
-		assertEquals(manager, totalData.getObj().getAccountName());
-		assertEquals(client.getPlantId(), totalData.getObj().getPlantId());
+		DevicesResponse devices = client.getDevicesByPlantList(client.getPlantId());
+		assertTrue(devices.getResult());
+		assertEquals(manager, devices.getObj().getDatas().getFirst().getAccountName());
+		assertEquals(client.getPlantId(), devices.getObj().getDatas().getFirst().getPlantId());
 		
 		YearResponse years = client.getEnergyTotalChart(client.getPlantId(), 2025);
 		assertTrue(years.getResult());
