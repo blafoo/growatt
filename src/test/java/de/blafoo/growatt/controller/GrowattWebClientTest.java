@@ -54,7 +54,7 @@ class GrowattWebClientTest {
 		assertEquals(manager, devices.getObj().getDatas().getFirst().getAccountName());
 		assertEquals(client.getPlantId(), devices.getObj().getDatas().getFirst().getPlantId());
 		
-		YearResponse years = client.getEnergyTotalChart(client.getPlantId(), 2025);
+		YearResponse years = client.getEnergyTotalChart(client.getPlantId(), LocalDate.now().getYear());
 		assertTrue(years.getResult());
         assertFalse(years.getObj().isEmpty());
 		
