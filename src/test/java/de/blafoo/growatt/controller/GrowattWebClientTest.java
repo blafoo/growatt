@@ -13,6 +13,8 @@ import de.blafoo.growatt.entity.MonthResponse;
 import de.blafoo.growatt.entity.TotalDataResponse;
 import de.blafoo.growatt.entity.YearResponse;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -53,19 +55,19 @@ class GrowattWebClientTest {
 		assertEquals(manager, totalData.getObj().getAccountName());
 		assertEquals(client.getPlantId(), totalData.getObj().getPlantId());
 		
-		YearResponse years = client.getEnergyTotalChart(client.getPlantId(), "2025");
+		YearResponse years = client.getEnergyTotalChart(client.getPlantId(), 2025);
 		assertTrue(years.getResult());
         assertFalse(years.getObj().isEmpty());
 		
-		DayResponse day = client.getEnergyDayChart(client.getPlantId(), "2025-05-31");
+		DayResponse day = client.getEnergyDayChart(client.getPlantId(), LocalDate.of(2025, 5,31));
         assertTrue(day.getResult());
 		assertEquals(24*12, day.getObj().getFirst().getDatas().getPac().size());
 		
-		MonthResponse month = client.getEnergyMonthChart(client.getPlantId(), "2025-05");
+		MonthResponse month = client.getEnergyMonthChart(client.getPlantId(), LocalDate.of(2025,5,1));
         assertTrue(month.getResult());
 		assertEquals(31, month.getObj().getFirst().getDatas().getEnergy().size());
 		
-		YearResponse year = client.getEnergyYearChart(client.getPlantId(), "2025");
+		YearResponse year = client.getEnergyYearChart(client.getPlantId(), 2025);
         assertTrue(year.getResult());
 		assertEquals(12, year.getObj().getFirst().getDatas().getEnergy().size());
 	}

@@ -22,11 +22,17 @@ import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Slf4j
 @Component
 public class GrowattWebClient {
 	
 	public static final String ONE_PLANT_ID = "onePlantId";
+
+	public static final String PATTERN_MONTH = "yyyy-MM";
+	public static final String PATTERN_DAY = "yyyy-MM-dd";
 
 	private final MultiValueMap<String, String> cookieJar = new LinkedMultiValueMap<>();
 	
@@ -83,7 +89,7 @@ public class GrowattWebClient {
 		MultiValueMap<String, ResponseCookie> cookies = response.cookies();
 		for (var key : cookies.keySet()) {
 			myCookies.add(key, cookies.getFirst(key).getValue());
-			log.debug(key + " : " + cookies.getFirst(key).getValue());
+            log.debug("{} : {}", key, cookies.getFirst(key).getValue());
 		}
 		return response.bodyToMono(String.class);
 	}
@@ -114,26 +120,26 @@ public class GrowattWebClient {
 	}
 
 	/**
-	 * Retrieve the power production for a specific day. The date as part of the EnergyRequest must have the format yyyy-mm-dd, e.g. 2023-05-31.
+	 * Retrieve the power production for a specific day.
 	 * The response contains 288 values for each five minute intervall of the day.
 	 */
-	public DayResponse getEnergyDayChart(String plantId, String date) {
-		return request("/energy/compare/getDevicesDayChart", plantId, date, null, "pac", DayResponse.class);
+	public DayResponse getEnergyDayChart(String plantId, LocalDate date) {
+		return request("/energy/compare/getDevicesDayChart", plantId, date.format(DateTimeFormatter.ofPattern(PATTERN_DAY)), null, "pac", DayResponse.class);
 	}
 	
 	/**
-	 * Retrieve the power production for a specific month. The date as part of the EnergyRequest must have the format yyyy-mm, e.g. 2023-05.
+	 * Retrieve the power production for a specific month. The day is ignored
 	 * The response contains one value for each day of the month.
 	 */
-	public MonthResponse getEnergyMonthChart(String plantId, String date) {
-		return request("/energy/compare/getDevicesMonthChart", plantId, date, null, "energy,autoEnergy", MonthResponse.class);
+	public MonthResponse getEnergyMonthChart(String plantId, LocalDate date) {
+		return request("/energy/compare/getDevicesMonthChart", plantId, date.format(DateTimeFormatter.ofPattern(PATTERN_MONTH)), null, "energy,autoEnergy", MonthResponse.class);
 	}
 	
 	/**
 	 * Retrieve the power production for a specific year. The year as part of the EnergyRequest must have the format yyyy, e.g. 2023.
 	 * The response contains one value for each month of the month.
 	 */
-	public YearResponse getEnergyYearChart(String plantId, String year) {
+	public YearResponse getEnergyYearChart(String plantId, int year) {
 		return request("/energy/compare/getDevicesYearChart", plantId, null, year, "autoEnergy", YearResponse.class);
 	}
 	
@@ -141,19 +147,13 @@ public class GrowattWebClient {
 	 * Retrieve the power production for the last 5 years.
      * The response contains a value for every year.
 	 */
-	public YearResponse getEnergyTotalChart(String plantId, String lastYear) {
+	public YearResponse getEnergyTotalChart(String plantId, int lastYear) {
 		return request("/energy/compare/getDevicesTotalChart", plantId, null, lastYear, "energy,autoEnergy", YearResponse.class);
 	}
 
-	private <T> T request(String uri, @NonNull String plantId, @Nullable String date, @Nullable String year, String params, Class<T> clazz) {
-		LinkedMultiValueMap<String, String> data = new LinkedMultiValueMap<>();
-		data.add("plantId", plantId);
-		if (StringUtils.isNotEmpty(date))
-			data.add("date", date);
-        if (StringUtils.isNotEmpty(year))
-            data.add("year", year);
-        data.add("jsonData", "[{\"type\":\"plant\",\"sn\":\"%s\",\"params\":\"%s\"}]".formatted(plantId, params));
-		
+	private <T> T request(String uri, @NonNull String plantId, @Nullable String date, @Nullable Integer year, String params, Class<T> clazz) {
+		LinkedMultiValueMap<String, String> data = createBody(plantId, date, year, params);
+
 		String infos = client
 			.post()
 			.uri(uri)
@@ -163,17 +163,28 @@ public class GrowattWebClient {
             .retrieve()
             .bodyToMono(String.class)
             .block();
-		
+
 		try {
 			if (StringUtils.isNotBlank(infos)) {
 				ObjectMapper om = new ObjectMapper();
 				return om.readValue(infos, clazz);
-			} else 
+			} else
 				log.error("POST to {} returned 'null'", uri);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
+	}
+
+	public static @NonNull LinkedMultiValueMap<String, String> createBody(@NonNull String plantId, @Nullable String date, @Nullable Integer year, @Nullable String params) {
+		LinkedMultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+		data.add("plantId", plantId);
+		if (StringUtils.isNotEmpty(date))
+			data.add("date", date);
+		if (year != null)
+			data.add("year", String.valueOf(year));
+		data.add("jsonData", "[{\"type\":\"plant\",\"sn\":\"%s\",\"params\":\"%s\"}]".formatted(plantId, params));
+		return data;
 	}
 }
