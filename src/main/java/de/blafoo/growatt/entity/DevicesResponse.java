@@ -43,11 +43,11 @@ public class DevicesResponse {
         public String bdcNum;
         public String nominalPower;
         public String bdcStatus;
-        public String eToday;
-        public String eMonth;
+        public Double eToday;
+        public Double eMonth;
         public String datalogTypeTest;
-        public String eTotal;
-        public String pac;
+        public Double eTotal;
+        public Double pac;
         public String datalogSn;
         public String alias;
         public String location;
