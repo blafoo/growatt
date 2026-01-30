@@ -2,7 +2,10 @@ package de.blafoo.growatt.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.blafoo.growatt.entity.*;
+import de.blafoo.growatt.entity.DayResponse;
+import de.blafoo.growatt.entity.MonthResponse;
+import de.blafoo.growatt.entity.TotalDataResponse;
+import de.blafoo.growatt.entity.YearResponse;
 import de.blafoo.growatt.md5.MD5;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -140,7 +143,7 @@ public class GrowattWebClient {
 	 * The response contains one value for each month of the month.
 	 */
 	public YearResponse getEnergyYearChart(String plantId, int year) {
-		return request("/energy/compare/getDevicesYearChart", plantId, null, year, "autoEnergy", YearResponse.class);
+		return request("/energy/compare/getDevicesYearChart", plantId, null, year, "energy,autoEnergy", YearResponse.class);
 	}
 	
 	/**
