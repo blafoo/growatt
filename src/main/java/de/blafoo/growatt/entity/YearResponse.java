@@ -1,6 +1,5 @@
 package de.blafoo.growatt.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class YearResponse {
 
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-	private Boolean result;
+	private ResultResponse resultResponse;
 	private List<Obj> obj;
 
 	@Getter

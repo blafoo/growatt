@@ -1,20 +1,16 @@
 package de.blafoo.growatt.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.blafoo.growatt.entity.DayResponse;
-import de.blafoo.growatt.entity.DevicesResponse;
-import de.blafoo.growatt.entity.MonthResponse;
-import de.blafoo.growatt.entity.YearResponse;
+import de.blafoo.growatt.entity.*;
+import tools.jackson.databind.ObjectMapper;
 import de.blafoo.growatt.md5.MD5;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -24,6 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.ProxyProvider;
+import tools.jackson.core.JacksonException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -100,20 +97,22 @@ public class GrowattWebClient {
 	/**
 	 * Login into server.growatt.com. Initialize all needed cookies for the following requests.
 	 */
-	public String login(String account, String password) {
+	public ResultResponse login(String account, String password) {
 		LinkedMultiValueMap<String, String> loginData = new LinkedMultiValueMap<>();
 		loginData.add("account", account);
 		loginData.add("passwordCrc", MD5.md5(password));
 		
-		return client
+		String response = client
 			.post()
 			.uri("/login")
 			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 			.body(BodyInserters.fromFormData(loginData))
-            .exchangeToMono(response -> readCookies(cookieJar, response))
+            .exchangeToMono(clientResponse -> readCookies(cookieJar, clientResponse))
             .block();
+
+		return mapToType("/login", response, ResultResponse.class);
     }
-	
+
 	/**
 	 * Retrieve generic informations about the power production.
 	 */
@@ -131,7 +130,7 @@ public class GrowattWebClient {
 	public DayResponse getEnergyDayChart(String plantId, LocalDate date) {
 		return request("/energy/compare/getDevicesDayChart", plantId, date.format(DateTimeFormatter.ofPattern(PATTERN_DAY)), null, "pac", DayResponse.class);
 	}
-	
+
 	/**
 	 * Retrieve the power production for a specific month. The day is ignored
 	 * The response contains one value for each day of the month.
@@ -139,7 +138,7 @@ public class GrowattWebClient {
 	public MonthResponse getEnergyMonthChart(String plantId, LocalDate date) {
 		return request("/energy/compare/getDevicesMonthChart", plantId, date.format(DateTimeFormatter.ofPattern(PATTERN_MONTH)), null, "energy,autoEnergy", MonthResponse.class);
 	}
-	
+
 	/**
 	 * Retrieve the power production for a specific year.
 	 * The response contains one value for each month of the month.
@@ -147,7 +146,7 @@ public class GrowattWebClient {
 	public YearResponse getEnergyYearChart(String plantId, int year) {
 		return request("/energy/compare/getDevicesYearChart", plantId, null, year, "energy,autoEnergy", YearResponse.class);
 	}
-	
+
 	/**
 	 * Retrieve the power production for the last 5 years.
      * The response contains a value for every year.
@@ -162,7 +161,7 @@ public class GrowattWebClient {
 	}
 
 	private <T> T request(String uri, LinkedMultiValueMap<String, String> payload, Class<T> clazz) {
-		String infos = client
+		String response = client
 			.post()
 			.uri(uri)
 			.cookies(cookies -> writeCookies(cookieJar, cookies))
@@ -172,16 +171,19 @@ public class GrowattWebClient {
             .bodyToMono(String.class)
             .block();
 
+		return mapToType(uri, response, clazz);
+}
+
+	private <T> T mapToType(String uri, String response, Class<T> clazz) {
 		try {
-			if (StringUtils.isNotBlank(infos)) {
+			if (StringUtils.isNotBlank(response)) {
 				ObjectMapper om = new ObjectMapper();
-				return om.readValue(infos, clazz);
+				return om.readValue(response, clazz);
 			} else
 				log.error("POST to {} returned 'null'", uri);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 

@@ -1,9 +1,6 @@
 package de.blafoo.growatt.controller;
 
-import de.blafoo.growatt.entity.DayResponse;
-import de.blafoo.growatt.entity.DevicesResponse;
-import de.blafoo.growatt.entity.MonthResponse;
-import de.blafoo.growatt.entity.YearResponse;
+import de.blafoo.growatt.entity.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,29 +42,29 @@ class GrowattWebClientTest {
 		
 		GrowattWebClient client = StringUtils.isBlank(proxyUrl) ? new GrowattWebClient() : new GrowattWebClient(proxyUrl, Integer.parseInt(proxyPort));
 		
-		String login = client.login(user, password);
-		assertEquals("{\"result\":1}", login);
+		ResultResponse login = client.login(user, password);
+		assertTrue(login.isSuccess());
 		assertNotNull(client.getPlantId());
 		
 		DevicesResponse devices = client.getDevicesByPlantList(client.getPlantId());
-		assertTrue(devices.getResult());
+		assertTrue(devices.getResultResponse().isSuccess());
 		assertEquals(manager, devices.getObj().getDatas().getFirst().getAccountName());
 		assertEquals(client.getPlantId(), devices.getObj().getDatas().getFirst().getPlantId());
 		
 		YearResponse years = client.getEnergyTotalChart(client.getPlantId(), LocalDate.now().getYear());
-		assertTrue(years.getResult());
+		assertTrue(years.getResultResponse().isSuccess());
         assertFalse(years.getObj().isEmpty());
 		
 		DayResponse day = client.getEnergyDayChart(client.getPlantId(), LocalDate.of(2025, 5,31));
-        assertTrue(day.getResult());
+        assertTrue(day.getResultResponse().isSuccess());
 		assertEquals(24*12, day.getObj().getFirst().getDatas().getPac().size());
 		
 		MonthResponse month = client.getEnergyMonthChart(client.getPlantId(), LocalDate.of(2025,5,1));
-        assertTrue(month.getResult());
+        assertTrue(month.getResultResponse().isSuccess());
 		assertEquals(31, month.getObj().getFirst().getDatas().getEnergy().size());
 		
 		YearResponse year = client.getEnergyYearChart(client.getPlantId(), 2025);
-        assertTrue(year.getResult());
+        assertTrue(year.getResultResponse().isSuccess());
 		assertEquals(12, year.getObj().getFirst().getDatas().getEnergy().size());
 	}
 

@@ -1,6 +1,5 @@
 package de.blafoo.growatt.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,8 +12,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class DevicesResponse {
 
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Boolean result;
+    private ResultResponse resultResponse;
     private Obj obj;
 
     @Getter
