@@ -12,14 +12,14 @@ API to query data from server.growatt.com for Growatt inverters.
 
 ```
 GrowattWebClient client = new GrowattWebClient();
-client.login(new LoginRequest("account", "password"));
-DayResponse day = client.getInvEnergyDayChart(new EnergyRequest(client.getPlantId(), "2023-05-31"));
+client.login("account", "password");
+DayResponse day = client.getEnergyDayChart(client.getPlantId(), LocalDate.of(2026, 2, 1));
 ```
 
 ## Examples
 
 1. Unit test `GrowattWebClientTest`
-1. [Vaadin 24 project using the `GrowattWebClient`](https://github.com/blafoo/BKW)
+1. [Vaadin 25 project using the `GrowattWebClient`](https://github.com/blafoo/BKW)
 
 ## Change log
 
