@@ -12,6 +12,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class DevicesResponse {
 
+    @JsonProperty("result")
     private ResultResponse resultResponse;
     private Obj obj;
 

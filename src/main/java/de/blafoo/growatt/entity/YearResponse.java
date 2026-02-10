@@ -1,5 +1,6 @@
 package de.blafoo.growatt.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class YearResponse {
 
+    @JsonProperty("result")
 	private ResultResponse resultResponse;
 	private List<Obj> obj;
 
